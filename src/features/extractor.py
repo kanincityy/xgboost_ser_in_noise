@@ -1,10 +1,3 @@
-"""
-Feature extraction module for speech emotion recognition.
-
-This module provides comprehensive audio feature extraction including
-F0, energy, MFCCs, spectral features, and their temporal derivatives.
-"""
-
 import logging
 from typing import Dict, List, Tuple, Optional
 import numpy as np

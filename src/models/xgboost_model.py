@@ -1,10 +1,3 @@
-"""
-XGBoost model implementation for speech emotion recognition.
-
-This module provides a complete XGBoost-based classifier with
-hyperparameter optimization and comprehensive evaluation capabilities.
-"""
-
 import logging
 import pickle
 from pathlib import Path

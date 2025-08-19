@@ -1,10 +1,3 @@
-"""
-Noise generation utilities for speech degradation experiments.
-
-This module provides functionality to add various types of noise
-to clean audio signals at specified signal-to-noise ratios.
-"""
-
 import logging
 from typing import Dict, List, Tuple
 import numpy as np

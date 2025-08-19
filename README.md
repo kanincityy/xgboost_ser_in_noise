@@ -47,7 +47,7 @@ The project is built with a modular, scalable, and reproducible architecture, ma
 
 -----
 
-## ⚡️ How to Run
+## How to Run
 
 You can run the entire experiment—from data download to result generation—with a single command. The script will automatically create the necessary directories (`data/raw`, `data/processed`, etc.).
 

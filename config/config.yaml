@@ -1,0 +1,88 @@
+# Data Configuration
+data:
+  target_sr: 16000
+  dataset_name: "ravdess"
+  emotions:
+    - "angry"
+    - "calm" 
+    - "happy"
+    - "sad"
+  
+# Audio Processing Configuration
+audio:
+  n_fft: 1024
+  hop_length: 512
+  n_mels: 128
+  n_mfcc: 13
+  target_num_frames: 141
+
+# Noise Configuration
+noise:
+  snr_levels: [20, 15, 10, 5, 0, -5, -10]  # dB values
+  noise_type: "white"
+
+# Feature Extraction Configuration
+features:
+  include_f0: true
+  include_energy: true
+  include_mfcc: true
+  include_delta_mfcc: true
+  include_delta2_mfcc: true
+  include_zcr: true
+  include_spectral_centroid: true
+
+# Model Configuration
+model:
+  xgboost:
+    objective: "multi:softmax"
+    tree_method: "hist"
+    device: "cuda"  # or "cpu"
+    eval_metric: "mlogloss"
+    random_state: 42
+    use_label_encoder: false
+
+# Hyperparameter Optimization Configuration
+hyperopt:
+  n_iter: 50
+  cv_folds: 3
+  random_state: 42
+  scoring: "neg_log_loss"
+
+# Training Configuration
+training:
+  test_size: 0.3
+  val_split: 0.5  # From temp set
+  random_state: 42
+  speaker_independent: true
+
+# Evaluation Configuration
+evaluation:
+  confidence_level: 95
+  n_bootstraps: 1000
+  metrics:
+    - "accuracy"
+    - "f1_score"
+    - "precision"
+    - "recall"
+
+# Visualization Configuration
+visualization:
+  figure_size: [10, 8]
+  dpi: 300
+  format: "png"
+  top_n_features: 10
+
+# Paths Configuration
+paths:
+  data_dir: "data/"
+  raw_data_dir: "data/raw/"
+  processed_data_dir: "data/processed/"
+  models_dir: "data/models/"
+  results_dir: "data/results/"
+  figures_dir: "data/results/figures/"
+
+# Logging Configuration
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "logs/ser_experiment.log"

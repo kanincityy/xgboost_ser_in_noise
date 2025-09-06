@@ -1,0 +1,119 @@
+import os
+import numpy as np
+import pandas as pd
+import librosa
+from tqdm import tqdm
+import joblib
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+from config import DATA_PATH, TARGET_SR, N_FFT, HOP_LENGTH, N_MFCC, GLOBAL_FEATURES_CLEAN_DIR
+
+def extract_global_features(audio_signal, sr, n_mfcc_to_extract):
+    """Extracts a comprehensive set of global features from an audio signal."""
+    # This combines all feature extraction steps from your notebook
+    features = {}
+    
+    # F0 Features
+    f0, voiced_flag, _ = librosa.pyin(audio_signal, fmin=librosa.note_to_hz('C2'), fmax=librosa.note_to_hz('C7'), frame_length=N_FFT, hop_length=HOP_LENGTH)
+    f0_voiced = f0[voiced_flag]
+    if len(f0_voiced) > 0:
+        features.update({'meanF0': np.mean(f0_voiced), 'stdF0': np.std(f0_voiced), 'minF0': np.min(f0_voiced), 'maxF0': np.max(f0_voiced)})
+    else:
+        features.update({'meanF0': 0, 'stdF0': 0, 'minF0': 0, 'maxF0': 0})
+
+    # Energy Features (RMS)
+    rms_energy = librosa.feature.rms(y=audio_signal, frame_length=N_FFT, hop_length=HOP_LENGTH)[0]
+    features.update({'meanEnergy': np.mean(rms_energy), 'stdEnergy': np.std(rms_energy), 'minEnergy': np.min(rms_energy), 'maxEnergy': np.max(rms_energy)})
+    
+    # MFCCs and derivatives
+    mfccs = librosa.feature.mfcc(y=audio_signal, sr=sr, n_mfcc=n_mfcc_to_extract, n_fft=N_FFT, hop_length=HOP_LENGTH)
+    delta_mfccs = librosa.feature.delta(mfccs)
+    delta2_mfccs = librosa.feature.delta(mfccs, order=2)
+    
+    for i in range(n_mfcc_to_extract):
+        features[f'mfcc_{i}_mean'] = np.mean(mfccs[i])
+        features[f'mfcc_{i}_std'] = np.std(mfccs[i])
+        features[f'delta_mfcc_{i}_mean'] = np.mean(delta_mfccs[i])
+        features[f'delta_mfcc_{i}_std'] = np.std(delta_mfccs[i])
+        features[f'delta2_mfcc_{i}_mean'] = np.mean(delta2_mfccs[i])
+        features[f'delta2_mfcc_{i}_std'] = np.std(delta2_mfccs[i])
+
+    # ZCR
+    zcr = librosa.feature.zero_crossing_rate(y=audio_signal, frame_length=N_FFT, hop_length=HOP_LENGTH)[0]
+    features.update({'meanZCR': np.mean(zcr), 'stdZCR': np.std(zcr)})
+
+    # Spectral Centroid
+    spec_cent = librosa.feature.spectral_centroid(y=audio_signal, sr=sr, n_fft=N_FFT, hop_length=HOP_LENGTH)[0]
+    features.update({'meanSpecCent': np.mean(spec_cent), 'stdSpecCent': np.std(spec_cent)})
+
+    return features
+
+def prepare_data_split(df_split):
+    """Loads audio, extracts features, and returns features and labels."""
+    all_features = []
+    labels_list = []
+    for _, row in tqdm(df_split.iterrows(), total=df_split.shape[0]):
+        try:
+            audio_signal, sr = librosa.load(row['full_path'], sr=TARGET_SR, mono=True)
+            features = extract_global_features(audio_signal, sr, N_MFCC)
+            all_features.append(features)
+            labels_list.append(row['emotion_label'])
+        except Exception as e:
+            print(f"Error processing {row['full_path']}: {e}")
+            
+    return pd.DataFrame(all_features), labels_list
+
+def main():
+    """Main function to process all data splits."""
+    os.makedirs(GLOBAL_FEATURES_CLEAN_DIR, exist_ok=True)
+
+    # Load dataframes
+    train_df = pd.read_pickle(os.path.join(DATA_PATH, 'train_df.pkl'))
+    val_df = pd.read_pickle(os.path.join(DATA_PATH, 'val_df.pkl'))
+    test_df = pd.read_pickle(os.path.join(DATA_PATH, 'test_df.pkl'))
+    
+    # Process training data
+    print("--- Preparing Training Data ---")
+    X_train_df, y_train_list = prepare_data_split(train_df)
+    
+    # Impute NaNs using training data mean
+    train_feature_means = X_train_df.mean()
+    X_train_df.fillna(train_feature_means, inplace=True)
+    train_feature_means.to_pickle(os.path.join(DATA_PATH, "train_global_feature_means.pkl"))
+    
+    # Fit LabelEncoder and StandardScaler ONLY on training data
+    le = LabelEncoder()
+    y_train_encoded = le.fit_transform(y_train_list)
+    
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train_df)
+
+    # Save fitted objects and feature names
+    joblib.dump(le, os.path.join(DATA_PATH, "emotion_label_encoder.joblib"))
+    joblib.dump(scaler, os.path.join(DATA_PATH, "global_features_scaler.joblib"))
+    joblib.dump(X_train_df.columns.tolist(), os.path.join(DATA_PATH, 'feature_column_names.joblib'))
+    
+    # Process validation and test data
+    print("\n--- Preparing Validation Data ---")
+    X_val_df, y_val_list = prepare_data_split(val_df)
+    X_val_df.fillna(train_feature_means, inplace=True) # Use train means
+    y_val_encoded = le.transform(y_val_list)
+    X_val_scaled = scaler.transform(X_val_df)
+
+    print("\n--- Preparing Test Data ---")
+    X_test_df, y_test_list = prepare_data_split(test_df)
+    X_test_df.fillna(train_feature_means, inplace=True) # Use train means
+    y_test_encoded = le.transform(y_test_list)
+    X_test_scaled = scaler.transform(X_test_df)
+
+    # Save all processed numpy arrays
+    np.save(os.path.join(GLOBAL_FEATURES_CLEAN_DIR, 'X_train.npy'), X_train_scaled)
+    np.save(os.path.join(GLOBAL_FEATURES_CLEAN_DIR, 'y_train.npy'), y_train_encoded)
+    np.save(os.path.join(GLOBAL_FEATURES_CLEAN_DIR, 'X_val.npy'), X_val_scaled)
+    np.save(os.path.join(GLOBAL_FEATURES_CLEAN_DIR, 'y_val.npy'), y_val_encoded)
+    np.save(os.path.join(GLOBAL_FEATURES_CLEAN_DIR, 'X_test_clean.npy'), X_test_scaled)
+    np.save(os.path.join(GLOBAL_FEATURES_CLEAN_DIR, 'y_test_clean.npy'), y_test_encoded)
+    
+    print(f"\nScaled clean features saved to {GLOBAL_FEATURES_CLEAN_DIR}")
+
+if __name__ == '__main__':
+    main()

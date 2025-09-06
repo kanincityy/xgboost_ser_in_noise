@@ -1,0 +1,12 @@
+numpy
+pandas
+scikit-learn
+xgboost
+librosa
+matplotlib
+seaborn
+joblib
+tqdm
+kagglehub
+scikit-optimize
+tensorflow 

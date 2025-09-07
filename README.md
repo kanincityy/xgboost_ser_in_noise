@@ -19,7 +19,7 @@ Acoustic features including Fundamental Frequency (F0), Root Mean Square (RMS) e
 The project is organised into a modular structure to ensure clarity and reproducibility.
 
 ```
-xgboost_ser_in_noise/
+xgboost_noise_ser/
 ├── data/                  # Stores datasets, features, and pre-processing objects.
 ├── models/                # Stores the final trained model.
 ├── results/               # Stores evaluation metrics (CSVs) and plots (PNGs).
@@ -33,7 +33,7 @@ xgboost_ser_in_noise/
 **1. Clone the Repository**
 ```bash
 git clone <your-repo-url>
-cd xgboost_ser_in_noise
+cd xgboost_noise_ser
 ```
 
 **2. Set up a Python Environment**
@@ -59,7 +59,7 @@ To run the full pipeline from data download to result visualisation, execute the
 
 ```bash
 # Make sure your virtual environment is activated
-# Run from the root directory: xgboost_ser_in_noise/
+# Run from the root directory: xgboost_noise_ser/
 
 # Step 1: Download, parse, and split the dataset
 python src/data_preparation.py

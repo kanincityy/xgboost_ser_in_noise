@@ -9,7 +9,6 @@ from config import DATA_PATH, TARGET_SR, N_FFT, HOP_LENGTH, N_MFCC, GLOBAL_FEATU
 
 def extract_global_features(audio_signal, sr, n_mfcc_to_extract):
     """Extracts a comprehensive set of global features from an audio signal."""
-    # This combines all feature extraction steps from your notebook
     features = {}
     
     # F0 Features

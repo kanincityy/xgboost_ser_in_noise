@@ -48,7 +48,7 @@ def main():
     
     cv_strategy = StratifiedGroupKFold(n_splits=CV_SPLITS_BAYES, shuffle=True, random_state=42)
     
-    # 3. Initialize XGBoost model and BayesSearchCV
+    # 3. Initialise XGBoost model and BayesSearchCV
     le = joblib.load(os.path.join(DATA_PATH, "emotion_label_encoder.joblib"))
     xgb_model = xgb.XGBClassifier(num_class=len(le.classes_), **XGB_FIXED_PARAMS)
     

@@ -2,7 +2,7 @@ import os
 
 # --- PATHS ---
 # Base directory for the project
-DRIVE_PATH = './' # Assuming you run from the root of the project
+DRIVE_PATH = './' # Change this to your desired base path
 DATA_PATH = os.path.join(DRIVE_PATH, 'data')
 OUTPUT_PATH = os.path.join(DRIVE_PATH, 'models')
 RESULTS_PATH = os.path.join(DRIVE_PATH, 'results')

@@ -13,6 +13,9 @@ PLOTS_PATH = os.path.join(RESULTS_PATH, 'plots')
 GLOBAL_FEATURES_CLEAN_DIR = os.path.join(DATA_PATH, 'xgb_global_features_scaled_clean')
 GLOBAL_FEATURES_NOISY_DIR = os.path.join(DATA_PATH, 'xgb_global_features_scaled_noisy')
 
+# --- REPRODUCIBILITY ---
+RANDOM_SEED = 42
+
 # --- DATASET & PREPROCESSING ---
 EMOTIONS_TO_KEEP = {
     "02": "calm", 
@@ -45,7 +48,6 @@ XGB_FIXED_PARAMS = {
     'tree_method': 'hist',
     'device': 'cuda',
     'eval_metric': 'mlogloss',
-    'use_label_encoder': False,
     'random_state': 42
 }
 

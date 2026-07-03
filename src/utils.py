@@ -29,9 +29,11 @@ def parse_ravdess_filename(filename, emotions_map):
     except Exception:
         return None
 
-def add_noise(clean_signal, snr_db):
+def add_noise(clean_signal, snr_db, rng=None):
     """Adds white noise to a signal at a specified SNR."""
-    noise = np.random.randn(len(clean_signal))
+    if rng is None:
+        rng = np.random.default_rng()
+    noise = rng.standard_normal(len(clean_signal))
     signal_power = np.mean(clean_signal**2)
     noise_power = np.mean(noise**2)
 

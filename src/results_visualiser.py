@@ -9,7 +9,7 @@ import librosa
 
 from config import (
     PLOTS_PATH, METRICS_PATH, OUTPUT_PATH, DATA_PATH, SNR_LEVELS,
-    TARGET_SR, N_FFT, HOP_LENGTH
+    TARGET_SR, N_FFT, HOP_LENGTH, RANDOM_SEED
 )
 from utils import add_noise, plot_audio_ser
 
@@ -96,13 +96,14 @@ def visualise_representative_speaker(speaker_id):
     speaker_files = test_df[test_df['speaker_id'] == speaker_id]
     
     conditions = {'Clean': None, 20: 20, 5: 5, -5: -5}
+    rng = np.random.default_rng(RANDOM_SEED)
 
     for _, row in speaker_files.iterrows():
         emotion = row['emotion_label']
         clean_signal, _ = librosa.load(row['full_path'], sr=TARGET_SR, mono=True)
-        
+
         for name, snr in conditions.items():
-            signal_to_plot = add_noise(clean_signal, snr) if snr is not None else clean_signal
+            signal_to_plot = add_noise(clean_signal, snr, rng=rng) if snr is not None else clean_signal
             
             title = f"Emotion: {emotion.capitalize()} | Speaker: {speaker_id} | Condition: {name}"
             save_name = f"speaker_{speaker_id}_{emotion}_{str(name).replace('-', 'neg')}.png"

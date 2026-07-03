@@ -1,0 +1,19 @@
+[project]
+name = "xgboost-ser-in-noise"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "joblib",
+    "kagglehub",
+    "librosa",
+    "matplotlib",
+    "numpy",
+    "pandas",
+    "scikit-learn",
+    "scikit-optimize",
+    "seaborn",
+    "tqdm",
+    "xgboost",
+]

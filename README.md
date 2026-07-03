@@ -36,19 +36,13 @@ git clone <your-repo-url>
 cd xgboost_noise_ser
 ```
 
-**2. Set up a Python Environment**
-It is highly recommended to use a virtual environment.
+**2. Install Dependencies**
+Dependencies are managed with [`uv`](https://docs.astral.sh/uv/). This creates a `.venv` and installs the exact versions pinned in `uv.lock`.
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
+uv sync
 ```
 
-**3. Install Dependencies**
-```bash
-pip install -r requirements.txt
-```
-
-**4. Kaggle API Credentials**
+**3. Kaggle API Credentials**
 This project uses the `kagglehub` library to download the dataset automatically. You need to have your Kaggle API token (`kaggle.json`) set up. Please follow the instructions [here](https://www.kaggle.com/docs/api) to get your token and place it in the `~/.kaggle/` directory.
 
 ## Dataset
@@ -58,27 +52,26 @@ The project uses the **Ryerson Audio-Visual Database of Emotional Speech and Son
 To run the full pipeline from data download to result visualisation, execute the scripts from the `src/` directory in the following order. It is recommended to run them from the root directory of the project.
 
 ```bash
-# Make sure your virtual environment is activated
 # Run from the root directory: xgboost_noise_ser/
 
 # Step 1: Download, parse, and split the dataset
-python src/data_preparation.py
+uv run python src/data_preparation.py
 
 # Step 2: Extract acoustic features from the clean audio splits
-python src/feature_extraction.py
+uv run python src/feature_extraction.py
 
 # Step 3: Generate noisy test sets for each SNR level
-python src/noisy_data_generator.py
+uv run python src/noisy_data_generator.py
 
 # Step 4: Train the XGBoost model with Bayesian hyperparameter optimisation
 # This step is computationally intensive and requires a CUDA-enabled GPU.
-python src/model_trainer.py
+uv run python src/model_trainer.py
 
 # Step 5: Evaluate the trained model on all clean and noisy test sets
-python src/model_evaluator.py
+uv run python src/model_evaluator.py
 
 # Step 6: Generate and save all plots and visualisations
-python src/results_visualiser.py
+uv run python src/results_visualiser.py
 ```
 
 After running all scripts, the `results/` folder will contain all generated plots and metric files.

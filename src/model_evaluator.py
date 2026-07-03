@@ -21,8 +21,8 @@ def get_bootstrap_metrics(y_true, y_pred, le):
         per_emotion_f1_scores = []
         per_emotion_acc_scores = []
         
-        for _ in range(N_BOOTSTRAPS):
-            indices = resample(np.arange(len(y_true)), replace=True)
+        for i in range(N_BOOTSTRAPS):
+            indices = resample(np.arange(len(y_true)), replace=True, random_state=i)
             boot_true, boot_pred = y_true[indices], y_pred[indices]
             
             # F1-Score

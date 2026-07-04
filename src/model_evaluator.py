@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 from config import (
     OUTPUT_PATH, DATA_PATH, GLOBAL_FEATURES_CLEAN_DIR, GLOBAL_FEATURES_NOISY_DIR,
-    METRICS_PATH, SNR_LEVELS, N_BOOTSTRAPS, CONFIDENCE_LEVEL
+    METRICS_PATH, SNR_LEVELS, N_BOOTSTRAPS, CONFIDENCE_LEVEL, DEVICE
 )
 
 def get_bootstrap_metrics(y_true, y_pred, le):
@@ -87,6 +87,7 @@ def main():
     
     # Load model, data splits, and encoder
     model = joblib.load(os.path.join(OUTPUT_PATH, 'best_xgb_model.joblib'))
+    model.set_params(device=DEVICE)
     test_df = pd.read_pickle(os.path.join(DATA_PATH, 'test_df.pkl'))
     le = joblib.load(os.path.join(DATA_PATH, "emotion_label_encoder.joblib"))
     

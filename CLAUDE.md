@@ -14,7 +14,7 @@ Dependency management is via `uv` — `pyproject.toml` declares deps, `uv.lock` 
 uv sync
 ```
 
-Requires a Kaggle API token (`~/.kaggle/kaggle.json`) — `data_preparation.py` downloads the RAVDESS dataset via `kagglehub`. Model training (`model_trainer.py`) requires a CUDA-enabled GPU (XGBoost is configured with `device: 'cuda'`).
+Requires a Kaggle API token (`~/.kaggle/kaggle.json`) — `data_preparation.py` downloads the RAVDESS dataset via `kagglehub`. XGBoost's `device` (`config.DEVICE`) defaults to `'cuda'`; override with `XGB_DEVICE=cpu` env var to run on CPU-only machines.
 
 There is no test suite, linter, or build step in this repository. `main.py` at the repo root is an unused stub left over from `uv init` — it is not part of the pipeline.
 
@@ -27,7 +27,7 @@ cd src
 uv run python data_preparation.py      # Download RAVDESS, parse filenames, speaker-independent train/val/test split
 uv run python feature_extraction.py    # Extract acoustic features from clean audio
 uv run python noisy_data_generator.py  # Generate noisy test sets at each SNR level in config.SNR_LEVELS
-uv run python model_trainer.py         # Bayesian hyperparameter search (BayesSearchCV) + train XGBoost; needs CUDA GPU
+uv run python model_trainer.py         # Bayesian hyperparameter search (BayesSearchCV) + train XGBoost; XGB_DEVICE=cuda|cpu (default cuda)
 uv run python model_evaluator.py       # Evaluate on clean + all noisy test sets, with bootstrap CIs
 uv run python results_visualiser.py    # Generate and save all plots
 ```
@@ -40,7 +40,7 @@ There's no CLI/entrypoint layer — each script's `main()` is invoked via `if __
 
 `config.RANDOM_SEED` (42) is the single seed used across the pipeline — `add_noise` (in `utils.py`) takes a seeded `np.random.default_rng(RANDOM_SEED)` passed in by `noisy_data_generator.py` and `results_visualiser.py` rather than drawing from unseeded global `np.random` state, and the bootstrap resampling in `model_evaluator.get_bootstrap_metrics` uses `random_state=i` per iteration. This means noisy-test-set generation and CI numbers are now stable across reruns — don't reintroduce unseeded `np.random.randn`/`resample` calls, since that would make published numbers non-reproducible from run to run.
 
-Two things are *not* pinned and could still cause drift across reruns/machines: the Kaggle-hosted RAVDESS dataset itself (`kagglehub.dataset_download` has no version pin), and `model_trainer.py`'s hardcoded `device: 'cuda'` (will hard-fail on a non-GPU machine).
+One thing is *not* pinned and could still cause drift across reruns/machines: the Kaggle-hosted RAVDESS dataset itself (`kagglehub.dataset_download` has no version pin). `device` is now selectable via `XGB_DEVICE` env var (see Setup) instead of hardcoded.
 
 ## Architecture
 

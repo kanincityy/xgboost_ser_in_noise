@@ -42,11 +42,14 @@ TEST_SIZE_FINAL = 0.5   # 50% of the 30% goes to the final test set (i.e., 15% o
 N_ITER_BAYES = 50
 CV_SPLITS_BAYES = 3
 
+# Device for XGBoost training/inference: 'cuda' or 'cpu'. Override with env var XGB_DEVICE.
+DEVICE = os.environ.get('XGB_DEVICE', 'cuda')
+
 # XGBoost fixed parameters
 XGB_FIXED_PARAMS = {
     'objective': 'multi:softmax',
     'tree_method': 'hist',
-    'device': 'cuda',
+    'device': DEVICE,
     'eval_metric': 'mlogloss',
     'random_state': 42
 }
